@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Image Classifier</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🤖 AI Image Classifier</h1>
+        <p>Upload an image and let AI identify what's in it</p>
+      </header>
+
+      <main>
+        <div class="upload-section">
+          <div class="upload-box" id="uploadBox">
+            <svg
+              class="upload-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <h3>Drag and drop your image here</h3>
+            <p>or click to browse</p>
+            <input
+              type="file"
+              id="fileInput"
+              accept="image/*"
+              style="display: none"
+            />
+          </div>
+
+          <div class="button-group">
+            <button id="classifyBtn" class="btn btn-primary" disabled>
+              Classify Image
+            </button>
+            <button
+              id="resetBtn"
+              class="btn btn-secondary"
+              style="display: none"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+
+        <div id="fileInfoSection" class="file-info" style="display: none">
+          <p>
+            📄 File: <span id="fileName"></span> | 📏 Size:
+            <span id="fileSize"></span>
+          </p>
+        </div>
+
+        <div id="previewSection" class="preview-section" style="display: none">
+          <img id="previewImage" alt="Preview" />
+        </div>
+
+        <div id="resultsSection" class="results-section" style="display: none">
+          <div class="results-header">
+            <h2>Classification Results</h2>
+            <span class="processing-time" id="processingTime"></span>
+          </div>
+          <div id="resultsList" class="results-list"></div>
+        </div>
+
+        <div id="loadingSection" class="loading-section" style="display: none">
+          <div class="spinner"></div>
+          <p>Analyzing image with AI...</p>
+        </div>
+
+        <div id="errorSection" class="error-section" style="display: none">
+          <p id="errorMessage"></p>
+        </div>
+
+        <div id="historySection" class="history-section" style="display: none">
+          <h3>📜 Recent Classifications</h3>
+          <div id="historyList" class="history-list"></div>
+        </div>
+      </main>
+
+      <footer>
+        <p>
+          🚀 AI Classification Engine | MobileNet Model | TensorFlow.js In
+          Browser
+        </p>
+        <p style="font-size: 0.85em; margin-top: 5px">
+          Intro to AI Class Project
+        </p>
+      </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
