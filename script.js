@@ -262,3 +262,43 @@ window.addEventListener("load", async () => {
     console.warn("Initialization error", error);
   }
 });
+
+
+//===================WEBSITE FUNCTIONS====================== 
+
+        website = async () => {
+            resize();
+            $('#main').show();
+            $('#login-model').hide();
+            $('#selection-screen').hide();
+            console.log("FUNCTION: website() /IS RUNNING")
+        }
+
+        //show the selection screen
+        showSelectionScreen = () => {
+            $('#main-menu').hide(); // Hide main menu
+            $('#selection-screen').fadeIn(300); // Smoothly show selection screen
+            console.log("FUNCTION: showSelectionScreen() / IS RUNNING");
+        }
+
+        showAbout = () => {
+            /*add show about page stuff*/
+        }
+
+        //show login/signup popup
+        showLogin = () => {
+            document.getElementById("login-model").style.display = "flex";
+            document.getElementById("confirm-password").style.display = "none";
+            document.getElementById("confirm-password").value = "";
+        }
+
+        //close login popup
+        closeLogin = () => {
+            document.getElementById("login-model").style.display = "none";
+        }
+
+        //close menu popup
+        closeMenu = () => {
+            $('#selection-screen').fadeOut(300); // Smoothly show selection screen
+            $('#main-menu').fadeIn(300); // Hide main menu
+        }
