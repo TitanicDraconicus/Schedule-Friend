@@ -7,6 +7,42 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+            <!-- ============ NAVIGATION BAR ============ -->
+        <nav id="navbar">
+            <div id="logo"></div>
+            <div id="nav-links">
+                <span id="user-display"></span>
+                <button class="nav-button" onclick="showAbout()">About Us</button>
+                <button class="nav-button" id="auth-button" onclick="showLogin()">Login / Signup</button>                
+            </div>
+        </nav>
+
+        <!-- ============ LOGIN MODEL (Hidden by Default) ============ -->
+        <div id="login-model" class="model">
+            <div class="model-content">
+                <span class="close" onclick="closeLogin()">&times;</span>
+                <h2>Login or Sign Up</h2>
+                <form id="authForm">
+                    <input type="text" id="username" placeholder="Username">
+                    <input type="password" id="password" placeholder="Password">
+                    <input type="password" id="confirm-password" placeholder="Confirm Password" style="display: none;">
+                    <button type="submit" id="login-btn">Login</button>
+                    <button id="signup-btn" onclick="signup()">Sign Up</button>
+                </form>
+                <!-- sign up error msgs -->
+                <p id="usernameError" style="color: red; display: none;">Username already exists.</p>
+                <p id="passwordError" style="color: red; display: none;">Passwords do not match.</p>
+
+            </div>
+        </div>
+        
+    </div> 
+
+
+    <script src="js/workoutlist.js"></script>
+    <script src="js/signup.js"></script>
+    <script src="js/login.js"></script>
+
     <div class="container">
       <header>
         <h1>🤖 AI Image Classifier</h1>
