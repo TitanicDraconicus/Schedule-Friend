@@ -146,7 +146,7 @@ function displayResults(predictions, time) {
   resultsList.innerHTML = "";
 
   // Show processing time
-  processingTime.textContent = `⚡ Processed in ${time}s`;
+  processingTime.textContent = `Processed in ${time}s`;
 
   predictions.forEach((prediction, index) => {
     const resultItem = document.createElement("div");
