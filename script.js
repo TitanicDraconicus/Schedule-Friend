@@ -65,7 +65,7 @@ document.addEventListener("keydown", (e) => {
 function handleFileSelection(file) {
   // Validate file type
   if (!file.type.startsWith("image/")) {
-    showError("❌ Please select a valid image file (JPG, PNG, GIF, etc.)");
+    showError("Please select a valid image file (JPG, PNG, GIF, etc.)");
     return;
   }
 
@@ -73,7 +73,7 @@ function handleFileSelection(file) {
   const maxSize = 10 * 1024 * 1024;
   if (file.size > maxSize) {
     showError(
-      `❌ File too large. Max size is 10MB (Your file: ${(file.size / 1024 / 1024).toFixed(2)}MB)`,
+      `File too large. Max size is 10MB (Your file: ${(file.size / 1024 / 1024).toFixed(2)}MB)`,
     );
     return;
   }
@@ -208,7 +208,7 @@ function updateHistoryDisplay() {
         ${index + 1}. ${item.label} (${item.confidence}%)
       </div>
       <div class="history-item-meta">
-        📄 ${item.filename} • 🕐 ${item.timestamp}
+         ${item.filename} •  ${item.timestamp}
       </div>
     `;
 
