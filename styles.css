@@ -1,347 +1,304 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+let selectedFile = null;
+let classificationHistory = [];
+let model = null;
+let modelReady = false;
 
-body {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-}
+// DOM Elements
+const uploadBox = document.getElementById("uploadBox");
+const fileInput = document.getElementById("fileInput");
+const classifyBtn = document.getElementById("classifyBtn");
+const resetBtn = document.getElementById("resetBtn");
+const previewSection = document.getElementById("previewSection");
+const previewImage = document.getElementById("previewImage");
+const fileInfoSection = document.getElementById("fileInfoSection");
+const fileName = document.getElementById("fileName");
+const fileSize = document.getElementById("fileSize");
+const resultsSection = document.getElementById("resultsSection");
+const processingTime = document.getElementById("processingTime");
+const resultsList = document.getElementById("resultsList");
+const loadingSection = document.getElementById("loadingSection");
+const errorSection = document.getElementById("errorSection");
+const errorMessage = document.getElementById("errorMessage");
+const historySection = document.getElementById("historySection");
+const historyList = document.getElementById("historyList");
 
-.container {
-  background: white;
-  border-radius: 15px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  max-width: 600px;
-  width: 100%;
-  overflow: hidden;
-}
+// File upload handling
+uploadBox.addEventListener("click", () => fileInput.click());
 
-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 40px 30px;
-  text-align: center;
-}
+uploadBox.addEventListener("dragover", (e) => {
+  e.preventDefault();
+  uploadBox.classList.add("dragover");
+});
 
-header h1 {
-  font-size: 2.5em;
-  margin-bottom: 10px;
-}
+uploadBox.addEventListener("dragleave", () => {
+  uploadBox.classList.remove("dragover");
+});
 
-header p {
-  font-size: 1.1em;
-  opacity: 0.9;
-}
+uploadBox.addEventListener("drop", (e) => {
+  e.preventDefault();
+  uploadBox.classList.remove("dragover");
 
-main {
-  padding: 40px 30px;
-}
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    handleFileSelection(files[0]);
+  }
+});
 
-.upload-section {
-  margin-bottom: 30px;
-}
+fileInput.addEventListener("change", (e) => {
+  if (e.target.files.length > 0) {
+    handleFileSelection(e.target.files[0]);
+  }
+});
 
-.upload-box {
-  border: 3px dashed #667eea;
-  border-radius: 10px;
-  padding: 40px 20px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background: #f8f9ff;
-}
+resetBtn.addEventListener("click", resetApp);
 
-.upload-box:hover {
-  border-color: #764ba2;
-  background: #f0f2ff;
-}
+// Keyboard shortcuts
+document.addEventListener("keydown", (e) => {
+  if (e.code === "Enter" && selectedFile && !classifyBtn.disabled) {
+    classifyImage();
+  }
+  if (e.code === "Escape") {
+    resetApp();
+  }
+});
 
-.upload-box.dragover {
-  border-color: #764ba2;
-  background: #e8ebff;
-  transform: scale(1.02);
-}
-
-.upload-icon {
-  width: 60px;
-  height: 60px;
-  color: #667eea;
-  margin-bottom: 15px;
-}
-
-.upload-box h3 {
-  color: #333;
-  margin-bottom: 5px;
-  font-size: 1.2em;
-}
-
-.upload-box p {
-  color: #666;
-  font-size: 0.95em;
-}
-
-.btn {
-  padding: 12px 30px;
-  border: none;
-  border-radius: 8px;
-  font-size: 1em;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  width: 100%;
-  margin-top: 20px;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-}
-
-.btn-secondary {
-  background: #ff6b6b;
-  color: white;
-}
-
-.btn-secondary:hover {
-  background: #ee5a52;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
-}
-
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.button-group {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.button-group .btn {
-  margin-top: 0;
-  flex: 1;
-}
-
-.file-info {
-  background: #e8f4f8;
-  border-left: 4px solid #667eea;
-  padding: 12px 15px;
-  border-radius: 6px;
-  color: #333;
-  font-size: 0.95em;
-  margin: 15px 0;
-}
-
-.file-info span {
-  font-weight: 600;
-  color: #667eea;
-}
-
-.preview-section {
-  text-align: center;
-  margin: 30px 0;
-}
-
-.preview-section img {
-  max-width: 100%;
-  max-height: 300px;
-  border-radius: 10px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-}
-
-.results-section {
-  margin-top: 30px;
-}
-
-.results-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.results-section h2 {
-  color: #333;
-  font-size: 1.5em;
-  margin: 0;
-}
-
-.processing-time {
-  background: #f0f2ff;
-  color: #667eea;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.85em;
-  font-weight: 600;
-}
-
-.results-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.result-item {
-  background: #f8f9ff;
-  padding: 15px;
-  border-radius: 8px;
-  border-left: 4px solid #667eea;
-}
-
-.result-label {
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.result-confidence {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  font-weight: 600;
-  font-size: 0.85em;
-  padding: 4px 10px;
-  border-radius: 15px;
-}
-
-.confidence-bar {
-  width: 100%;
-  height: 8px;
-  background: #e0e0e0;
-  border-radius: 10px;
-  overflow: hidden;
-  margin-top: 6px;
-}
-
-.confidence-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-  border-radius: 10px;
-  transition: width 0.5s ease;
-}
-
-.loading-section {
-  text-align: center;
-  padding: 40px 20px;
-}
-
-.spinner {
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #667eea;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-
-  .history-section {
-    margin-top: 30px;
-    padding-top: 30px;
-    border-top: 2px solid #e0e0e0;
+function handleFileSelection(file) {
+  // Validate file type
+  if (!file.type.startsWith("image/")) {
+    showError("Please select a valid image file (JPG, PNG, GIF, etc.)");
+    return;
   }
 
-  .history-section h3 {
-    color: #333;
-    margin-bottom: 15px;
-    font-size: 1.1em;
+  // Validate file size (max 10MB)
+  const maxSize = 10 * 1024 * 1024;
+  if (file.size > maxSize) {
+    showError(
+      `File too large. Max size is 10MB (Your file: ${(file.size / 1024 / 1024).toFixed(2)}MB)`,
+    );
+    return;
   }
 
-  .history-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-height: 250px;
-    overflow-y: auto;
-  }
+  selectedFile = file;
+  errorSection.style.display = "none";
 
-  .history-item {
-    background: #f8f9ff;
-    padding: 12px;
-    border-radius: 6px;
-    border-left: 3px solid #764ba2;
-    font-size: 0.9em;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
+  // Display file info
+  fileName.textContent = file.name;
+  fileSize.textContent = `${(file.size / 1024).toFixed(2)} KB`;
+  fileInfoSection.style.display = "block";
 
-  .history-item:hover {
-    background: #e8ebff;
-    transform: translateX(5px);
-  }
+  // Show preview
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    previewImage.src = e.target.result;
+    previewSection.style.display = "block";
+  };
+  reader.readAsDataURL(file);
 
-  .history-item-label {
-    font-weight: 600;
-    color: #333;
-  }
+  // Enable classify button
+  classifyBtn.disabled = false;
 
-  .history-item-meta {
-    color: #999;
-    font-size: 0.85em;
-    margin-top: 3px;
-  }
-  animation: spin 1s linear infinite;
-  margin: 0 auto 20px;
+  // Show reset button
+  resetBtn.style.display = "inline-block";
+
+  // Hide previous results
+  resultsSection.style.display = "none";
 }
 
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
+classifyBtn.addEventListener("click", async () => {
+  if (!selectedFile) {
+    showError("Please select an image first");
+    return;
   }
-  100% {
-    transform: rotate(360deg);
+
+  await classifyImage();
+});
+
+async function classifyImage() {
+  try {
+    if (!modelReady) {
+      throw new Error(
+        "AI model is still loading. Please wait a few seconds and try again.",
+      );
+    }
+
+    showLoading(true);
+    errorSection.style.display = "none";
+    resultsSection.style.display = "none";
+
+    const start = performance.now();
+    const rawPredictions = await model.classify(previewImage, 5);
+    const processingMs = Math.max(performance.now() - start, 1);
+    const predictions = rawPredictions.map((item) => ({
+      label: item.className,
+      confidence: item.probability * 100,
+    }));
+
+    displayResults(predictions, (processingMs / 1000).toFixed(3));
+    addToHistory(predictions, selectedFile.name);
+  } catch (error) {
+    showError("⚠️ " + error.message);
+  } finally {
+    showLoading(false);
   }
 }
 
-.loading-section p {
-  color: #666;
-  font-size: 1.1em;
+function displayResults(predictions, time) {
+  resultsList.innerHTML = "";
+
+  // Show processing time
+  processingTime.textContent = `Processed in ${time}s`;
+
+  predictions.forEach((prediction, index) => {
+    const resultItem = document.createElement("div");
+    resultItem.className = "result-item";
+
+    const confidence = prediction.confidence;
+    const confidencePercent = confidence.toFixed(2);
+
+    resultItem.innerHTML = `
+      <div style="width: 100%;">
+        <div class="result-label">
+          <span>${index + 1}. <strong>${prediction.label}</strong></span>
+          <span class="result-confidence">${confidencePercent}%</span>
+        </div>
+        <div class="confidence-bar">
+          <div class="confidence-fill" style="width: ${confidence}%; transition-delay: ${index * 0.1}s;"></div>
+        </div>
+      </div>
+    `;
+
+    resultsList.appendChild(resultItem);
+  });
+
+  resultsSection.style.display = "block";
 }
 
-.error-section {
-  background: #fee;
-  border: 2px solid #f88;
-  border-radius: 8px;
-  padding: 20px;
-  margin-top: 20px;
-}
+function addToHistory(predictions, imgName) {
+  const topPrediction = predictions[0];
+  const historyItem = {
+    label: topPrediction.label,
+    confidence: topPrediction.confidence.toFixed(2),
+    filename: imgName,
+    timestamp: new Date().toLocaleTimeString(),
+  };
 
-.error-section p {
-  color: #d33;
-  font-weight: 600;
-}
+  classificationHistory.unshift(historyItem);
 
-footer {
-  background: #f8f9ff;
-  color: #666;
-  padding: 20px 30px;
-  text-align: center;
-  font-size: 0.9em;
-}
-
-@media (max-width: 600px) {
-  header h1 {
-    font-size: 1.8em;
+  // Keep only last 5 items
+  if (classificationHistory.length > 5) {
+    classificationHistory.pop();
   }
 
-  main {
-    padding: 20px;
+  updateHistoryDisplay();
+}
+
+function updateHistoryDisplay() {
+  if (classificationHistory.length === 0) {
+    historySection.style.display = "none";
+    return;
   }
 
-  header {
-    padding: 30px 20px;
+  historyList.innerHTML = "";
+
+  classificationHistory.forEach((item, index) => {
+    const historyItemEl = document.createElement("div");
+    historyItemEl.className = "history-item";
+    historyItemEl.innerHTML = `
+      <div class="history-item-label">
+        ${index + 1}. ${item.label} (${item.confidence}%)
+      </div>
+      <div class="history-item-meta">
+         ${item.filename} •  ${item.timestamp}
+      </div>
+    `;
+
+    historyList.appendChild(historyItemEl);
+  });
+
+  historySection.style.display = "block";
+}
+
+function resetApp() {
+  selectedFile = null;
+  fileInput.value = "";
+  previewSection.style.display = "none";
+  resultsSection.style.display = "none";
+  errorSection.style.display = "none";
+  fileInfoSection.style.display = "none";
+  classifyBtn.disabled = true;
+  resetBtn.style.display = "none";
+  uploadBox.classList.remove("dragover");
+}
+
+function showLoading(show) {
+  loadingSection.style.display = show ? "block" : "none";
+}
+
+function showError(message) {
+  errorMessage.textContent = message;
+  errorSection.style.display = "block";
+}
+
+async function loadModel() {
+  try {
+    showLoading(true);
+    model = await mobilenet.load({ version: 2, alpha: 1.0 });
+    modelReady = true;
+    console.log("Model loaded in browser successfully.");
+  } catch (error) {
+    showError(
+      "Could not load AI model. Check internet connection and refresh.",
+    );
+    console.error(error);
+  } finally {
+    showLoading(false);
   }
 }
+
+window.addEventListener("load", async () => {
+  try {
+    await loadModel();
+  } catch (error) {
+    console.warn("Initialization error", error);
+  }
+});
+
+
+//===================WEBSITE FUNCTIONS====================== 
+
+        website = async () => {
+            resize();
+            $('#main').show();
+            $('#login-model').hide();
+            $('#selection-screen').hide();
+            console.log("FUNCTION: website() /IS RUNNING")
+        }
+
+        //show the selection screen
+        showSelectionScreen = () => {
+            $('#main-menu').hide(); // Hide main menu
+            $('#selection-screen').fadeIn(300); // Smoothly show selection screen
+            console.log("FUNCTION: showSelectionScreen() / IS RUNNING");
+        }
+
+        showAbout = () => {
+            /*add show about page stuff*/
+        }
+
+        //show login/signup popup
+        showLogin = () => {
+            document.getElementById("login-model").style.display = "flex";
+            document.getElementById("confirm-password").style.display = "none";
+            document.getElementById("confirm-password").value = "";
+        }
+
+        //close login popup
+        closeLogin = () => {
+            document.getElementById("login-model").style.display = "none";
+        }
+
+        //close menu popup
+        closeMenu = () => {
+            $('#selection-screen').fadeOut(300); // Smoothly show selection screen
+            $('#main-menu').fadeIn(300); // Hide main menu
+        }
