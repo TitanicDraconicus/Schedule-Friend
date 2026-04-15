@@ -35,8 +35,6 @@
 
             </div>
         </div>
-        
-    </div> 
 
 
     <script src="js/signup.js"></script>
@@ -122,7 +120,7 @@
 
       <footer>
         <p>
-          AI Classification Engine | MobileNet Model | TensorFlow.js In
+          AI Classification Engine | COCO-SSD Model | TensorFlow.js In
           Browser
         </p>
         <p style="font-size: 0.85em; margin-top: 5px">
@@ -131,8 +129,13 @@
       </footer>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js"></script>
-    <script src="script.js"></script>
+<!-- Load TensorFlow.js core -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+
+<!-- Load the COCO-SSD object detection model -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+
+<!-- Your local script must come AFTER the libraries -->
+<script src="script.js"></script>
   </body>
 </html>
