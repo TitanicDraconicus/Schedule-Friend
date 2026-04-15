@@ -116,9 +116,7 @@ classifyBtn.addEventListener("click", async () => {
 async function classifyImage() {
   try {
     if (!modelReady) {
-      throw new Error(
-        "AI model is still loading. Please wait a few seconds and try again.",
-      );
+      throw new Error("AI model is still loading...");
     }
 
     showLoading(true);
@@ -126,11 +124,19 @@ async function classifyImage() {
     resultsSection.style.display = "none";
 
     const start = performance.now();
-    const rawPredictions = await model.classify(previewImage, 5);
+    // model.detect(image, maxResults, minScore)
+    const rawPredictions = await model.detect(previewImage, 5, 0.5); 
     const processingMs = Math.max(performance.now() - start, 1);
+
+    if (rawPredictions.length === 0) {
+        showError("No objects detected. Try a clearer image.");
+        return;
+    }
+
     const predictions = rawPredictions.map((item) => ({
-      label: item.className,
-      confidence: item.probability * 100,
+      label: item.class,
+      confidence: item.score * 100,
+      bbox: item.bbox
     }));
 
     displayResults(predictions, (processingMs / 1000).toFixed(3));
@@ -242,7 +248,7 @@ function showError(message) {
 async function loadModel() {
   try {
     showLoading(true);
-    model = await mobilenet.load({ version: 2, alpha: 1.0 });
+    model = await cocoSsd.load({ base: 'mobilenet_v2' }); 
     modelReady = true;
     console.log("Model loaded in browser successfully.");
   } catch (error) {
